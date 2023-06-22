@@ -114,7 +114,7 @@ int main() {
 	for (std::chrono::nanoseconds duration : std::vector< std::chrono::nanoseconds >{
 			 std::chrono::nanoseconds(100), std::chrono::microseconds(100), std::chrono::milliseconds(1),
 			 std::chrono::milliseconds(10), std::chrono::milliseconds(100) }) {
-		std::cout << "Targeting a sleep of " << to_string(duration) << " - errors:" << std::endl;
+		std::cout << "Targeting a sleep of " << to_string(duration) << std::endl;
 
 		for (std::size_t i = 0; i < functions.size(); ++i) {
 			std::chrono::nanoseconds diff(0);
