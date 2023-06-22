@@ -118,17 +118,20 @@ int main() {
 
 		for (std::size_t i = 0; i < functions.size(); ++i) {
 			std::chrono::nanoseconds diff(0);
+			std::chrono::nanoseconds actualDuration(0);
 
 			for (std::size_t k = 0; k < repetitions; k++) {
 				std::chrono::nanoseconds actual = testSleep(functions[i], duration);
 
 				diff += actual - duration;
+				actualDuration += actual;
 			}
 
 			diff /= repetitions;
+			actualDuration /= repetitions;
 
-			std::cout << "  " << to_string(diff) << " (" << (100 * diff.count() / duration.count()) << "%) - "
-					  << functionNames[i] << std::endl;
+			std::cout << "  actual: " << to_string(actualDuration) << " -> error: " << to_string(diff) << " ("
+					  << (100 * diff.count() / duration.count()) << "%)      " << functionNames[i] << std::endl;
 		}
 	}
 
