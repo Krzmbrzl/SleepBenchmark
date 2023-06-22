@@ -46,6 +46,21 @@ void conditionVariableWaitUntil(std::chrono::nanoseconds sleepTime) {
 	var.wait_until(lock, end);
 }
 
+void spinWaitYield(std::chrono::nanoseconds sleepTime) {
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now() + sleepTime;
+
+	while (std::chrono::steady_clock::now() < end) {
+		std::this_thread::yield();
+	}
+}
+
+void spinWaitBusy(std::chrono::nanoseconds sleepTime) {
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now() + sleepTime;
+
+	while (std::chrono::steady_clock::now() < end) {
+	}
+}
+
 std::string to_string(std::chrono::nanoseconds duration) {
 	if (duration >= std::chrono::seconds(1)) {
 		return std::to_string(std::chrono::duration_cast< std::chrono::seconds >(duration).count()) + "s";
@@ -63,7 +78,8 @@ int main() {
 
 	std::cout << "Averaging sleep errors over " << repetitions << " repetitions" << std::endl;
 
-	std::vector< FuncPtr > functions = { sleepFor, sleepUntil, conditionVariableWaitFor, conditionVariableWaitFor };
+	std::vector< FuncPtr > functions = { sleepFor,      sleepUntil,  conditionVariableWaitFor, conditionVariableWaitFor,
+										 spinWaitYield, spinWaitBusy };
 
 	for (std::chrono::nanoseconds duration : std::vector< std::chrono::nanoseconds >{
 			 std::chrono::nanoseconds(100), std::chrono::microseconds(100), std::chrono::milliseconds(1),
