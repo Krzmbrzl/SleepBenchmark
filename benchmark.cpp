@@ -98,10 +98,10 @@ int main() {
 	std::cout << "Averaging sleep errors over " << repetitions << " repetitions" << std::endl;
 
 	std::vector< FuncPtr > functions = {
-		sleepFor, sleepUntil, conditionVariableWaitFor, conditionVariableWaitFor, osSleep, spinWaitYield, spinWaitBusy
+		sleepFor, sleepUntil, conditionVariableWaitFor, conditionVariableWaitUntil, osSleep, spinWaitYield, spinWaitBusy
 	};
 	std::vector< std::string > functionNames = {
-		"sleepFor",      "sleepUntil",  "conditionVariableWaitFor", "conditionVariableWaitFor", "osSleep",
+		"sleepFor",      "sleepUntil",  "conditionVariableWaitFor", "conditionVariableWaitUntil", "osSleep",
 		"spinWaitYield", "spinWaitBusy"
 	};
 
