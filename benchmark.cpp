@@ -6,6 +6,12 @@
 #include <thread>
 #include <vector>
 
+#ifdef OS_WINDOWS
+#	include <windows.h>
+#else
+#	include <unistd.h>
+#endif
+
 using FuncPtr = void (*)(std::chrono::nanoseconds);
 
 std::chrono::nanoseconds testSleep(FuncPtr sleepFunction, std::chrono::nanoseconds sleepTime) {
@@ -61,6 +67,16 @@ void spinWaitBusy(std::chrono::nanoseconds sleepTime) {
 	}
 }
 
+#ifdef OS_WINDOWS
+void osSleep(std::chrono::nanoseconds sleepTime) {
+	Sleep(std::chrono::duration_cast< std::chrono::milliseconds >(sleepTime).count());
+}
+#else
+void osSleep(std::chrono::nanoseconds sleepTime) {
+	usleep(std::chrono::duration_cast< std::chrono::microseconds >(sleepTime).count());
+}
+#endif
+
 std::string to_string(std::chrono::nanoseconds duration) {
 	if (duration >= std::chrono::seconds(1)) {
 		return std::to_string(std::chrono::duration_cast< std::chrono::seconds >(duration).count()) + "s";
@@ -78,13 +94,25 @@ int main() {
 
 	std::cout << "Averaging sleep errors over " << repetitions << " repetitions" << std::endl;
 
-	std::vector< FuncPtr > functions = { sleepFor,      sleepUntil,  conditionVariableWaitFor, conditionVariableWaitFor,
-										 spinWaitYield, spinWaitBusy };
+	std::vector< FuncPtr > functions = {
+		sleepFor, sleepUntil, conditionVariableWaitFor, conditionVariableWaitFor, osSleep, spinWaitYield, spinWaitBusy
+	};
+	std::vector< std::string > functionNames = {
+		"sleepFor",      "sleepUntil",  "conditionVariableWaitFor", "conditionVariableWaitFor", "osSleep",
+		"spinWaitYield", "spinWaitBusy"
+	};
+
+	if (functionNames.size() != functions.size()) {
+		std::cerr << "Implementation error" << std::endl;
+
+		return 1;
+	}
 
 	for (std::chrono::nanoseconds duration : std::vector< std::chrono::nanoseconds >{
 			 std::chrono::nanoseconds(100), std::chrono::microseconds(100), std::chrono::milliseconds(1),
 			 std::chrono::milliseconds(10), std::chrono::milliseconds(100) }) {
-		std::cout << "Targeting a sleep of " << to_string(duration) << std::endl;
+		std::cout << "Targeting a sleep of " << to_string(duration) << " - errors:" << std::endl;
+
 		for (std::size_t i = 0; i < functions.size(); ++i) {
 			std::chrono::nanoseconds diff(0);
 
@@ -96,8 +124,10 @@ int main() {
 
 			diff /= repetitions;
 
-			std::cout << " " << (i + 1) << "-th function difference: " << to_string(diff) << " ("
-					  << (100 * diff.count() / duration.count()) << "%)" << std::endl;
+			std::cout << "  " << to_string(diff) << " (" << (100 * diff.count() / duration.count()) << "%) - "
+					  << functionNames[i] << std::endl;
 		}
 	}
+
+	return 0;
 }

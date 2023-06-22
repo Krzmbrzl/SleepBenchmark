@@ -11,3 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_executable(benchmark
 	benchmark.cpp
 )
+
+if (WIN32)
+	target_compile_definitions(benchmark PRIVATE OS_WINDOWS)
+endif()
