@@ -9,7 +9,7 @@
 #ifdef OS_WINDOWS
 #	include <windows.h>
 #else
-#	include <unistd.h>
+#	include <time.h>
 #endif
 
 using FuncPtr = void (*)(std::chrono::nanoseconds);
@@ -73,7 +73,10 @@ void osSleep(std::chrono::nanoseconds sleepTime) {
 }
 #else
 void osSleep(std::chrono::nanoseconds sleepTime) {
-	usleep(std::chrono::duration_cast< std::chrono::microseconds >(sleepTime).count());
+	timespec spec;
+	spec.tv_sec  = 0;
+	spec.tv_nsec = sleepTime.count();
+	nanosleep(&spec, nullptr);
 }
 #endif
 
